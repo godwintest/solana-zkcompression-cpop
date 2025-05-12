@@ -1,0 +1,16 @@
+declare module '@solana/web3.js';
+declare module '@solana/wallet-adapter-react';
+declare module '@solana/wallet-adapter-base';
+declare module '@solana/wallet-adapter-wallets';
+declare module '@solana/wallet-adapter-react-ui';
+declare module '@project-serum/anchor';
+declare module 'qrcode.react';
+declare module 'bs58';
+declare module 'buffer';
+declare module '@lightprotocol/compressed-token';
+declare module 'next/link';
+declare module 'next/image';
+declare module 'next/navigation';
+declare module 'react';
+declare module 'react-dom';
+declare module 'react-qr-scanner';

@@ -1,0 +1,359 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useAnchorWallet } from '../hooks/useAnchorWallet';
+import { PublicKey, Transaction } from '@solana/web3.js';
+import { connection } from '../utils/solana/connection';
+import { 
+  mintCompressedToken, 
+  claimCompressedTokenForEvent, 
+  fetchCompressedTokens,
+  formatCompressedToken
+} from '../utils/solana/compressedToken';
+
+interface Token {
+  id: string;
+  name: string;
+  event: string;
+  date: string;
+  createdAt: number;
+  image?: string;
+  // Added for analytics
+  claimed?: boolean;
+  claimedAt?: number;
+  claimedBy?: string;
+  verified?: boolean;
+}
+
+interface TokenStats {
+  totalTokens: number;
+  uniqueEvents: number;
+  oldestToken: Token | null;
+  newestToken: Token | null;
+  // Added for analytics
+  claimedTokens: number;
+  claimRate: number; // percentage
+  avgClaimTime?: number; // in hours
+}
+
+interface TokenContextType {
+  tokens: Token[];
+  isLoading: boolean;
+  error: string | null;
+  fetchTokens: () => Promise<void>;
+  mintToken: (eventName: string, eventDescription: string, tokenSupply: number) => Promise<string | null>;
+  claimToken: (eventId: string) => Promise<boolean>;
+  clearError: () => void;
+  // New methods for advanced features
+  getTokenStats: () => TokenStats;
+  verifyTokenMetadata: (tokenId: string) => Promise<boolean>;
+  generateQRCode: (eventId: string) => Promise<string>;
+}
+
+const TokenContext = createContext<TokenContextType | undefined>(undefined);
+
+export const useTokens = () => {
+  const context = useContext(TokenContext);
+  if (!context) {
+    throw new Error('useTokens must be used within a TokenProvider');
+  }
+  return context;
+};
+
+interface TokenProviderProps {
+  children: React.ReactNode;
+}
+
+export const TokenProvider: React.FC<TokenProviderProps> = ({ children }) => {
+  const [tokens, setTokens] = useState<Token[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const wallet = useWallet();
+  // Add null checks to prevent 'Cannot read properties of undefined' errors
+  const connected = wallet?.connected || false;
+  const publicKey = wallet?.publicKey || null;
+  const signTransaction = wallet?.signTransaction || null;
+  const signAllTransactions = wallet?.signAllTransactions || null;
+  const anchorProvider = useAnchorWallet();
+
+  // Clear error message
+  const clearError = () => setError(null);
+
+  // Calculate token statistics for analytics
+  const getTokenStats = (): TokenStats => {
+    if (tokens.length === 0) {
+      return {
+        totalTokens: 0,
+        uniqueEvents: 0,
+        oldestToken: null,
+        newestToken: null,
+        claimedTokens: 0,
+        claimRate: 0
+      };
+    }
+
+    // Get unique events
+    const uniqueEvents = new Set(tokens.map(token => token.event)).size;
+
+    // Find oldest and newest tokens
+    const sortedTokens = [...tokens].sort((a, b) => a.createdAt - b.createdAt);
+    const oldestToken = sortedTokens[0];
+    const newestToken = sortedTokens[sortedTokens.length - 1];
+
+    // Calculate claim statistics
+    const claimedTokens = tokens.filter(token => token.claimed).length;
+    const claimRate = (claimedTokens / tokens.length) * 100;
+
+    // Calculate average claim time if data is available
+    let avgClaimTime: number | undefined = undefined;
+    const tokensWithClaimTime = tokens.filter(token => token.claimed && token.claimedAt);
+    if (tokensWithClaimTime.length > 0) {
+      const totalClaimTime = tokensWithClaimTime.reduce((total, token) => {
+        return total + ((token.claimedAt as number) - token.createdAt);
+      }, 0);
+      avgClaimTime = (totalClaimTime / tokensWithClaimTime.length) / (1000 * 60 * 60); // Convert to hours
+    }
+
+    return {
+      totalTokens: tokens.length,
+      uniqueEvents,
+      oldestToken,
+      newestToken,
+      claimedTokens,
+      claimRate,
+      avgClaimTime
+    };
+  };
+
+  // Simulate token verification (placeholder)
+  const simulateTokenVerification = async (provider: any, tokenId: string): Promise<boolean> => {
+    // Simulate blockchain verification delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // For demo purposes, we'll consider tokens with even-length IDs as 'verified'
+    return tokenId.length % 2 === 0;
+  };
+
+  // Verify token metadata on-chain
+  const verifyTokenMetadata = async (tokenId: string): Promise<boolean> => {
+    if (!connected || !publicKey) {
+      setError('Please connect your wallet to verify tokens');
+      return false;
+    }
+
+    setIsLoading(true);
+    clearError();
+
+    try {
+      // Use the anchorProvider from the hook
+      if (!anchorProvider) {
+        throw new Error('Failed to create Anchor provider');
+      }
+      
+      // Find the token in our local state
+      const token = tokens.find(t => t.id === tokenId);
+      if (!token) {
+        throw new Error('Token not found');
+      }
+
+      // Verify the token metadata on the blockchain
+      // This is a placeholder for the actual verification logic
+      // In a real implementation, this would query the blockchain
+      const isVerified = await simulateTokenVerification(anchorProvider, tokenId);
+      
+      // In a real implementation, this would verify the token metadata on-chain
+      // For demonstration, we'll just mark it as verified
+      const updatedTokens = tokens.map(t => 
+        t.id === tokenId ? { ...t, verified: isVerified } : t
+      );
+      
+      setTokens(updatedTokens);
+      return isVerified;
+    } catch (error: any) {
+      console.error('Error verifying token metadata:', error);
+      setError(error.message || 'Failed to verify token metadata');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Generate QR code for an event
+  const generateQRCode = async (eventId: string): Promise<string> => {
+    if (!connected || !publicKey) {
+      setError('Please connect your wallet to generate QR codes');
+      return '';
+    }
+
+    setIsLoading(true);
+    clearError();
+
+    try {
+      // SIMULATION MODE - No actual transaction signing required
+      // This avoids the 'Attempt to debit an account but found no record of a prior credit' error
+      console.log('Simulating QR code generation for event:', eventId);
+      console.log('Creator wallet:', publicKey.toString());
+      
+      // In a real implementation, this would create a QR code with the event ID and signature
+      // For demonstration, we'll just return a URL with the event ID
+      const qrCodeUrl = `https://cpop.app/claim/${eventId}`;
+      
+      return qrCodeUrl;
+    } catch (error: any) {
+      console.error('Error generating QR code:', error);
+      setError(error.message || 'Failed to generate QR code');
+      return '';
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch tokens from the blockchain
+  const fetchTokens = async () => {
+    if (!connected || !publicKey) {
+      setError('Please connect your wallet to view your tokens');
+      return;
+    }
+
+    setIsLoading(true);
+    clearError();
+
+    try {
+      // Use the anchorProvider from the hook
+      
+      if (!anchorProvider) {
+        throw new Error('Failed to create Anchor provider');
+      }
+      
+      // Fetch compressed tokens from the blockchain
+      const compressedTokens = await fetchCompressedTokens(anchorProvider);
+      
+      // Format the compressed tokens to match our Token interface
+      const formattedTokens = compressedTokens.map(formatCompressedToken);
+      
+      setTokens(formattedTokens);
+    } catch (error: any) {
+      console.error('Error fetching tokens:', error);
+      setError(error.message || 'Failed to fetch tokens');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Mint a new token (for event creators)
+  const mintToken = async (eventName: string, eventDescription: string, tokenSupply: number): Promise<string | null> => {
+    if (!connected || !publicKey || !signTransaction) {
+      setError('Please connect your wallet to mint tokens');
+      return null;
+    }
+
+    setIsLoading(true);
+    clearError();
+
+    try {
+      console.log('Starting token minting process...');
+      // Use the anchorProvider from the hook
+      
+      if (!anchorProvider) {
+        console.error('Failed to create Anchor provider');
+        throw new Error('Failed to create Anchor provider');
+      }
+      
+      console.log('Anchor provider created successfully');
+      
+      // Mint a compressed token on the blockchain
+      // We'll handle the transaction signing inside mintCompressedToken
+      console.log('Calling mintCompressedToken with params:', {
+        eventName,
+        eventDescription,
+        tokenSupply
+      });
+      
+      const eventId = await mintCompressedToken(
+        anchorProvider,
+        eventName,
+        eventDescription,
+        tokenSupply
+      );
+      
+      console.log('Event created successfully with ID:', eventId);
+      
+      // Refresh the token list to show the newly minted token
+      await fetchTokens();
+      
+      return eventId;
+    } catch (error: any) {
+      console.error('Error minting token:', error);
+      setError(error.message || 'Failed to mint token');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Claim a token (for event attendees)
+  const claimToken = async (eventId: string): Promise<boolean> => {
+    if (!connected || !publicKey || !signTransaction) {
+      setError('Please connect your wallet to claim tokens');
+      return false;
+    }
+
+    setIsLoading(true);
+    clearError();
+
+    try {
+      // Use the anchorProvider from the hook
+      
+      if (!anchorProvider) {
+        throw new Error('Failed to create Anchor provider');
+      }
+      
+      // Create a transaction to sign (this is part of the claiming process)
+      const transaction = new Transaction();
+      transaction.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+      transaction.feePayer = publicKey;
+      
+      // Sign the transaction
+      await signTransaction(transaction);
+      
+      // Claim a compressed token from the blockchain
+      const success = await claimCompressedTokenForEvent(anchorProvider, eventId);
+      
+      if (success) {
+        // Refresh the token list to show the newly claimed token
+        await fetchTokens();
+      }
+      
+      return success;
+    } catch (error: any) {
+      console.error('Error claiming token:', error);
+      setError(error.message || 'Failed to claim token');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch tokens when wallet connection changes
+  useEffect(() => {
+    if (connected && publicKey) {
+      fetchTokens();
+    } else {
+      setTokens([]);
+    }
+  }, [connected, publicKey]);
+
+  const value = {
+    tokens,
+    isLoading,
+    error,
+    fetchTokens,
+    mintToken,
+    claimToken,
+    clearError,
+    getTokenStats,
+    verifyTokenMetadata,
+    generateQRCode,
+  };
+
+  return <TokenContext.Provider value={value}>{children}</TokenContext.Provider>;
+};

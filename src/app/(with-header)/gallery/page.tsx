@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from '@/utils/react-imports';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useTokens } from '@/context/TokenContext';
 import TokenCard from '@/components/TokenCard';

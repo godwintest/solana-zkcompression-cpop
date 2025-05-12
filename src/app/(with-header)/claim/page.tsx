@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import * as React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import dynamic from 'next/dynamic';
@@ -19,17 +19,17 @@ export default function ClaimPage() {
   const program = useProgram();
   const searchParams = useSearchParams();
   
-  const [scanning, setScanning] = useState(false);
-  const [claimed, setClaimed] = useState(false);
-  const [claimError, setClaimError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [eventDetails, setEventDetails] = useState({
+  const [scanning, setScanning] = React.useState(false);
+  const [claimed, setClaimed] = React.useState(false);
+  const [claimError, setClaimError] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [eventDetails, setEventDetails] = React.useState({
     name: '',
     mint: ''
   });
 
   // Check if there are URL parameters for direct claiming
-  useEffect(() => {
+  React.useEffect(() => {
     const mintParam = searchParams?.get('mint');
     const eventParam = searchParams?.get('event');
     

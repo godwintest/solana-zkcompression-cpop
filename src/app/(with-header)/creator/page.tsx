@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, FormEvent } from 'react';
+import React from 'react';
+const { useState } = React;
+type FormEvent<T = Element> = React.FormEvent<T>;
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useProgram } from '@/utils/solana/anchor';

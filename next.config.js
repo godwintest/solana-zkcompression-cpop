@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: false,
+  swcMinify: true,
+  experimental: {
+    esmExternals: true
+  },
   // Disable font optimization to avoid nanoid dependency
   optimizeFonts: false,
   // Configure SWC to handle React imports

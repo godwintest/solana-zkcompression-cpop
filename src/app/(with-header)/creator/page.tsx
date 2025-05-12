@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+type FormEvent<T = Element> = React.FormEvent<T>;
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useProgram } from '@/utils/solana/anchor';
@@ -25,7 +26,7 @@ export default function CreatorPage() {
   const [mintError, setMintError] = useState('');
   const [eventCreated, setEventCreated] = useState(false);
 
-  const handleCreateEvent = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateEvent = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!connected || !publicKey) {
       alert('Please connect your wallet first');

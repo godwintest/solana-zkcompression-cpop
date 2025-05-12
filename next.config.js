@@ -4,6 +4,10 @@ const nextConfig = {
   swcMinify: false,
   // Disable font optimization to avoid nanoid dependency
   optimizeFonts: false,
+  // Configure SWC to handle React imports
+  compiler: {
+    styledComponents: true,
+  },
   webpack: (config) => {
     config.resolve.fallback = {
       fs: false,

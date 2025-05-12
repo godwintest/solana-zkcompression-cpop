@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from 'react';
+import React, { useState } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useProgram } from '@/utils/solana/anchor';
@@ -14,16 +14,16 @@ export default function CreatorPage() {
   const { connection } = useConnection();
   const program = useProgram();
   
-  const [eventName, setEventName] = React.useState('');
-  const [eventDescription, setEventDescription] = React.useState('');
-  const [tokenSupply, setTokenSupply] = React.useState(100);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [mintSuccess, setMintSuccess] = React.useState(false);
-  const [qrCodeData, setQrCodeData] = React.useState('');
-  const [mintAddress, setMintAddress] = React.useState('');
-  const [eventPubkey, setEventPubkey] = React.useState<any | null>(null);
-  const [mintError, setMintError] = React.useState('');
-  const [eventCreated, setEventCreated] = React.useState(false);
+  const [eventName, setEventName] = useState('');
+  const [eventDescription, setEventDescription] = useState('');
+  const [tokenSupply, setTokenSupply] = useState(100);
+  const [isLoading, setIsLoading] = useState(false);
+  const [mintSuccess, setMintSuccess] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState('');
+  const [mintAddress, setMintAddress] = useState('');
+  const [eventPubkey, setEventPubkey] = useState<any | null>(null);
+  const [mintError, setMintError] = useState('');
+  const [eventCreated, setEventCreated] = useState(false);
 
   const handleCreateEvent = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

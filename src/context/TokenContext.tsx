@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from '@/utils/react-imports';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { mintCompressedTokens, claimCompressedToken, getCompressedTokens } from '@/utils/lightProtocol';
 

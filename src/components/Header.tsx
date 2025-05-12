@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React from '@/utils/react-imports';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';

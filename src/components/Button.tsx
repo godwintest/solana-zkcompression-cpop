@@ -1,4 +1,4 @@
-import React from 'react';
+import React from '@/utils/react-imports';
 
 type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';

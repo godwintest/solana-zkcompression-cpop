@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from '@/utils/react-imports';
 
 interface TokenCardProps {
   id: string;

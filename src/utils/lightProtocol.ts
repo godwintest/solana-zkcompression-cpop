@@ -1,4 +1,4 @@
-import { Connection, PublicKey, Keypair } from '@solana/web3.js';
+import type { Connection, PublicKey, Keypair } from '../types/solana-types';
 
 // Note: In a real implementation, you would import the actual Light Protocol SDK
 // import { CompressedToken } from '@lightprotocol/compressed-token';
@@ -36,18 +36,18 @@ export async function mintCompressedTokens(
 /**
  * Claim a compressed token
  * @param connection Solana connection
- * @param recipient The wallet that will receive the token
+ * @param claimer The wallet that will receive the token
  * @param mintAddress The mint address of the token to claim
  * @returns Transaction signature
  */
 export async function claimCompressedToken(
   connection: Connection,
-  recipient: PublicKey,
+  claimer: PublicKey,
   mintAddress: string
 ): Promise<string> {
   // In a real implementation, this would use the Light Protocol SDK
   // For now, we'll simulate the process
-  console.log(`Claiming compressed token ${mintAddress} for recipient: ${recipient.toString()}`);
+  console.log(`Claiming compressed token ${mintAddress} for recipient: ${claimer.toString()}`);
   
   // Simulate network delay
   await new Promise(resolve => setTimeout(resolve, 2000));

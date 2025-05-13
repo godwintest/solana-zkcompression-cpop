@@ -21,8 +21,15 @@ export default defineConfig({
     // Polyfills for Solana web3.js
     commonjsOptions: {
       transformMixedEsModules: true,
-    }
+    },
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+      },
+    },
   },
+  root: __dirname,
+  publicDir: 'public',
   server: {
     port: 3000,
     open: true,

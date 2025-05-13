@@ -1,19 +1,17 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
-        'solana-purple': '#9945FF',
-        'solana-green': '#14F195',
-        'solana-blue': '#00C2FF',
-      },
-      fontFamily: {
-        sans: ['var(--font-inter)'],
+        'primary': '#9945FF',
+        'secondary': '#14F195',
+        'accent': '#85FFC4',
+        'background': '#0D1117',
+        'foreground': '#FFFFFF',
       },
     },
   },

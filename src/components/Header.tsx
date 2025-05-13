@@ -1,41 +1,37 @@
-"use client";
-
-import React from '@/utils/react-imports';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import '@solana/wallet-adapter-react-ui/styles.css';
 
-export const Header = () => {
-  const pathname = usePathname();
+const Header: React.FC = () => {
+  const location = useLocation();
+  const { connected } = useWallet();
+
+  const isActive = (path: string) => {
+    return location.pathname === path ? 'bg-purple-700' : 'bg-gray-800 hover:bg-gray-700';
+  };
 
   return (
-    <header className="w-full py-4 px-6 flex justify-between items-center border-b border-gray-800">
-      <div className="flex items-center space-x-8">
-        <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-solana-purple via-solana-blue to-solana-green inline-block text-transparent bg-clip-text">
-          cPOP
-        </Link>
-        <nav className="hidden md:flex space-x-6">
-          <Link 
-            href="/creator" 
-            className={`${pathname?.startsWith('/creator') ? 'text-solana-green' : 'text-gray-300'} hover:text-solana-blue transition-colors`}
-          >
-            Creator Dashboard
-          </Link>
-          <Link 
-            href="/claim" 
-            className={`${pathname?.startsWith('/claim') ? 'text-solana-green' : 'text-gray-300'} hover:text-solana-blue transition-colors`}
-          >
-            Claim Tokens
-          </Link>
-          <Link 
-            href="/gallery" 
-            className={`${pathname?.startsWith('/gallery') ? 'text-solana-green' : 'text-gray-300'} hover:text-solana-blue transition-colors`}
-          >
-            Token Gallery
-          </Link>
-        </nav>
+    <header className="bg-gray-900 border-b border-gray-800 py-4 px-6">
+      <div className="container mx-auto flex justify-between items-center">
+        <div className="flex items-center">
+          <Link to="/" className="text-2xl font-bold text-white mr-8">cPOP</Link>
+          <nav className="hidden md:flex space-x-4">
+            <Link to="/" className={`px-4 py-2 rounded text-white ${isActive('/')}`}>Home</Link>
+            <Link to="/gallery" className={`px-4 py-2 rounded text-white ${isActive('/gallery')}`}>Gallery</Link>
+            <Link to="/claim" className={`px-4 py-2 rounded text-white ${isActive('/claim')}`}>Claim</Link>
+            {connected && (
+              <Link to="/creator" className={`px-4 py-2 rounded text-white ${isActive('/creator')}`}>Creator</Link>
+            )}
+          </nav>
+        </div>
+        <div>
+          <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
+        </div>
       </div>
-      <WalletMultiButton />
     </header>
   );
 };
+
+export default Header;

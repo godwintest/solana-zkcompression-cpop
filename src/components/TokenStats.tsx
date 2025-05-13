@@ -1,41 +1,72 @@
 import React from 'react';
 
-interface TokenStatsProps {
-  totalTokens: number;
-  uniqueEvents: number;
-  oldestToken?: string; // Date string
-  newestToken?: string; // Date string
+interface Token {
+  id: string;
+  name: string;
+  event: string;
+  date: string;
+  createdAt: number;
 }
 
-const TokenStats = ({ totalTokens, uniqueEvents, oldestToken, newestToken }: TokenStatsProps) => {
+interface TokenStatsProps {
+  tokens: Token[];
+}
+
+const TokenStats: React.FC<TokenStatsProps> = ({ tokens }) => {
+  // Calculate unique events
+  const uniqueEvents = () => {
+    const events = new Set(tokens.map(token => token.event));
+    return events.size;
+  };
+
+  // Find oldest token
+  const oldestToken = () => {
+    if (tokens.length === 0) return 'None';
+    const oldest = tokens.reduce((prev, current) => 
+      (prev.createdAt < current.createdAt) ? prev : current
+    );
+    return formatDate(oldest.date);
+  };
+
+  // Find newest token
+  const newestToken = () => {
+    if (tokens.length === 0) return 'None';
+    const newest = tokens.reduce((prev, current) => 
+      (prev.createdAt > current.createdAt) ? prev : current
+    );
+    return formatDate(newest.date);
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (error) {
+      return dateString; // Return original string if parsing fails
+    }
+  };
+
   return (
     <div className="bg-gray-800 rounded-lg p-6 mb-8">
-      <h2 className="text-xl font-semibold mb-4">Collection Statistics</h2>
-      
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <div className="text-3xl font-bold text-solana-purple mb-2">{totalTokens}</div>
-          <div className="text-gray-300 text-sm">Total Tokens</div>
+      <h2 className="text-xl font-semibold mb-4">Your Token Statistics</h2>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-gray-700 p-4 rounded-lg">
+          <p className="text-gray-400 text-sm">Total Tokens</p>
+          <p className="text-2xl font-bold">{tokens.length}</p>
         </div>
-        
-        <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-          <div className="text-3xl font-bold text-solana-blue mb-2">{uniqueEvents}</div>
-          <div className="text-gray-300 text-sm">Unique Events</div>
+        <div className="bg-gray-700 p-4 rounded-lg">
+          <p className="text-gray-400 text-sm">Unique Events</p>
+          <p className="text-2xl font-bold">{uniqueEvents()}</p>
         </div>
-        
-        {oldestToken && (
-          <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-            <div className="text-xl font-bold text-solana-green mb-2">{oldestToken}</div>
-            <div className="text-gray-300 text-sm">First Token</div>
-          </div>
-        )}
-        
-        {newestToken && (
-          <div className="bg-gray-700/50 rounded-lg p-4 text-center">
-            <div className="text-xl font-bold text-solana-green mb-2">{newestToken}</div>
-            <div className="text-gray-300 text-sm">Latest Token</div>
-          </div>
-        )}
+        <div className="bg-gray-700 p-4 rounded-lg">
+          <p className="text-gray-400 text-sm">Oldest Token</p>
+          <p className="text-2xl font-bold">{oldestToken()}</p>
+        </div>
+        <div className="bg-gray-700 p-4 rounded-lg">
+          <p className="text-gray-400 text-sm">Newest Token</p>
+          <p className="text-2xl font-bold">{newestToken()}</p>
+        </div>
       </div>
     </div>
   );

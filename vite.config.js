@@ -8,17 +8,17 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
+      'src': resolve(__dirname, 'src'),
     },
   },
   define: {
     'process.env': {},
-    // Fix for Buffer is not defined error
-    global: {},
+    global: 'globalThis',
+    'process.env.NODE_DEBUG': 'false',
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
-    // Polyfills for Solana web3.js
     commonjsOptions: {
       transformMixedEsModules: true,
     },
@@ -26,10 +26,24 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'index.html'),
       },
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'solana-vendor': ['@solana/web3.js', '@solana/wallet-adapter-react'],
+        },
+      },
+    },
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      define: {
+        global: 'globalThis',
+      },
     },
   },
   root: __dirname,
   publicDir: 'public',
+  base: '/',
   server: {
     port: 3000,
     open: true,

@@ -1,5 +1,5 @@
-import { Connection, PublicKey, Keypair, Transaction, SystemProgram, sendAndConfirmTransaction } from '@solana/web3.js';
-import { Program, AnchorProvider, web3, BN } from '@project-serum/anchor';
+import { SystemProgram, PublicKey, Keypair } from '@solana/web3.js';
+import { BN } from '@project-serum/anchor';
 
 // This would be the actual program ID in a real implementation
 const PROGRAM_ID = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS');
@@ -14,17 +14,17 @@ const PROGRAM_ID = new PublicKey('Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS')
  * @returns Transaction signature and event public key
  */
 export async function initializeEvent(
-  program: Program,
-  wallet: web3.Keypair | web3.PublicKey,
+  program: any,
+  wallet: any,
   eventName: string,
   eventDescription: string,
   tokenSupply: number
-): Promise<{ txSignature: string, eventPubkey: PublicKey }> {
+): Promise<{ txSignature: string, eventPubkey: any }> {
   // In a real implementation, this would use the actual program to initialize an event
   // For now, we'll simulate the process
   
   // Generate a new keypair for the event account
-  const eventKeypair = web3.Keypair.generate();
+  const eventKeypair = Keypair.generate();
   
   try {
     // Call the program to initialize the event
@@ -35,10 +35,10 @@ export async function initializeEvent(
     )
     .accounts({
       event: eventKeypair.publicKey,
-      creator: wallet instanceof web3.Keypair ? wallet.publicKey : wallet,
+      creator: wallet instanceof Keypair ? wallet.publicKey : wallet,
       systemProgram: SystemProgram.programId,
     })
-    .signers(wallet instanceof web3.Keypair ? [wallet, eventKeypair] : [eventKeypair])
+    .signers(wallet instanceof Keypair ? [wallet, eventKeypair] : [eventKeypair])
     .rpc();
     
     return {
@@ -59,19 +59,19 @@ export async function initializeEvent(
  * @returns Transaction signature
  */
 export async function claimToken(
-  program: Program,
-  wallet: web3.Keypair | web3.PublicKey,
-  eventPubkey: PublicKey
+  program: any,
+  wallet: any,
+  eventPubkey: any
 ): Promise<string> {
   try {
     // Call the program to claim a token
     const tx = await program.methods.claimToken()
     .accounts({
       event: eventPubkey,
-      claimer: wallet instanceof web3.Keypair ? wallet.publicKey : wallet,
+      claimer: wallet instanceof Keypair ? wallet.publicKey : wallet,
       systemProgram: SystemProgram.programId,
     })
-    .signers(wallet instanceof web3.Keypair ? [wallet] : [])
+    .signers(wallet instanceof Keypair ? [wallet] : [])
     .rpc();
     
     return tx;
@@ -89,18 +89,18 @@ export async function claimToken(
  * @returns Transaction signature
  */
 export async function deactivateEvent(
-  program: Program,
-  wallet: web3.Keypair | web3.PublicKey,
-  eventPubkey: PublicKey
+  program: any,
+  wallet: any,
+  eventPubkey: any
 ): Promise<string> {
   try {
     // Call the program to deactivate the event
     const tx = await program.methods.deactivateEvent()
     .accounts({
       event: eventPubkey,
-      creator: wallet instanceof web3.Keypair ? wallet.publicKey : wallet,
+      creator: wallet instanceof Keypair ? wallet.publicKey : wallet,
     })
-    .signers(wallet instanceof web3.Keypair ? [wallet] : [])
+    .signers(wallet instanceof Keypair ? [wallet] : [])
     .rpc();
     
     return tx;
@@ -116,7 +116,7 @@ export async function deactivateEvent(
  * @param eventPubkey The public key of the event
  * @returns Event details
  */
-export async function getEventDetails(program: Program, eventPubkey: PublicKey) {
+export async function getEvent(program: any, eventPubkey: any): Promise<any> {
   try {
     // Fetch the event account data
     const eventAccount = await program.account.event.fetch(eventPubkey);

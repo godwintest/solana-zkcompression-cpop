@@ -1,5 +1,7 @@
-import { Connection, PublicKey, Keypair, clusterApiUrl } from '@solana/web3.js';
-import { Program, AnchorProvider, web3, setProvider, Idl } from '@project-serum/anchor';
+import { Connection as SolanaConnection, PublicKey, Keypair, clusterApiUrl } from '@solana/web3.js';
+import type { Connection } from '../../types/solana-types';
+import { Program, AnchorProvider, web3, setProvider } from '@project-serum/anchor';
+import type { Idl } from '../../types/anchor-types';
 import { useAnchorWallet } from '@solana/wallet-adapter-react';
 
 // This would be the actual program ID in a real implementation
@@ -177,6 +179,6 @@ export function useProgram() {
     return null;
   }
   
-  const connection = new Connection(clusterApiUrl('devnet'), 'confirmed');
+  const connection = new SolanaConnection(clusterApiUrl('devnet'), 'confirmed');
   return getProgram(connection, wallet);
 }
